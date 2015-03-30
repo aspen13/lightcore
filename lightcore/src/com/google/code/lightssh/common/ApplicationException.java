@@ -2,7 +2,7 @@ package com.google.code.lightssh.common;
 
 /**
  * 系统根异常
- * @author YangXiaojin
+ * @author YangXiaojin ++
  *
  */
 public class ApplicationException extends RuntimeException{
