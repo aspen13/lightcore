@@ -45,6 +45,11 @@ public class JpaDao<T extends Persistence<?>> implements Dao<T>,Serializable{
 	private static Logger log = LoggerFactory.getLogger(JpaDao.class);
 	
 	/**
+	 * SELECT NEW(
+	 */
+	public static final String NEW_MATCHE = "(\\s?)(?i)SELECT(\\s+)(?i)NEW(\\s?)\\((\\s*.*)"; 
+	
+	/**
 	 * entity class
 	 */
     protected Class<T> entityClass;
@@ -315,6 +320,7 @@ public class JpaDao<T extends Persistence<?>> implements Dao<T>,Serializable{
 		String as_matche = "(.*\\s+)(?i)AS(\\s+.*)"; 
 		String as_replace = "(\\s+)(?i)AS(\\s+)";
 		String as_symbol_replace = "(\\s+)(?i)AS(\\s+)\\w+(\\s*)";
+		
 		if( hql.matches( as_matche ) ){ //存在AS
 			String[] array = hql.split(as_symbol_replace);
 			if( array.length == 1){
@@ -337,11 +343,17 @@ public class JpaDao<T extends Persistence<?>> implements Dao<T>,Serializable{
 		String symbol = fetchAsSymbol( from_jqpl );
 		String count_hql = " SELECT COUNT("+(!StringUtil.hasText(symbol)?"*":symbol)+") ";
 		if(StringUtil.clean(select_jpql)!=null){
-			String[] sels = select_jpql.trim().split("( )+");
-			if( sels.length == 2 ){
-				count_hql = sels[0] + " COUNT( " + sels[1] + " )";
-			}else if( sels.length == 3 ){
-				count_hql = sels[0] + " COUNT( " + sels[1] + " " + sels[2]+ " )";
+			if( select_jpql.matches(NEW_MATCHE) ){
+				//匹配到 Select new ( xxx ) 
+				count_hql = " SELECT COUNT( * ) ";
+			}else{
+				String[] sels = select_jpql.trim().split("( )+");
+			
+				if( sels.length == 2 ){
+					count_hql = sels[0] + " COUNT( " + sels[1] + " )";
+				}else if( sels.length == 3 ){ //? distinct
+					count_hql = sels[0] + " COUNT( " + sels[1] + " " + sels[2]+ " )";
+				}
 			}
 		}
 		count_hql += from_jqpl;
