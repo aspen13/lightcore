@@ -423,7 +423,7 @@ public class JpaDao<T extends Persistence<?>> implements Dao<T>,Serializable{
 	@Override
 	public T readWithLock(Serializable identity) {
 		return (T)getEntityManager().find( this.entityClass 
-				, identity,LockModeType.PESSIMISTIC_READ );
+				, identity,LockModeType.PESSIMISTIC_WRITE );
 	}
 	
 	@Override
