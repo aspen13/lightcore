@@ -422,8 +422,12 @@ public class JpaDao<T extends Persistence<?>> implements Dao<T>,Serializable{
 	
 	@Override
 	public T readWithLock(Serializable identity) {
-		return (T)getEntityManager().find( this.entityClass 
+		T entity = (T)getEntityManager().find( this.entityClass 
 				, identity,LockModeType.PESSIMISTIC_WRITE );
+		
+		//解决Mysql[事务隔离级别 READ_COMMINTED ] SELECT ... FOR UPDATE ,线程并发 互斥锁无法生效问题
+		getEntityManager().refresh(entity, LockModeType.PESSIMISTIC_WRITE );
+		return entity;
 	}
 	
 	@Override
